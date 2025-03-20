@@ -55,17 +55,20 @@ def authenticate_google_calendar():
 
     return build("calendar", "v3", credentials=creds)
 
+
 def parse_shift_input(input_string, default_duration, default_shift):
     """
     Przetwarza wejściowy tekst z danymi dotyczącymi zmian i zwraca listę zmian.
     """
-    pattern = re.compile(r"(\d{1,2})([DN]?)\s*(\d{1,2}h)?")
+    pattern = re.compile(r"(\d{1,2})([DN]?)\s*(\d{1,2}h)?(\d{1,2}m)?")
     shifts = []
 
     for match in pattern.finditer(input_string):
         day = int(match.group(1))
         shift_type = match.group(2) if match.group(2) else default_shift
-        duration = int(match.group(3)[:-1]) * 60 if match.group(3) else default_duration
+        hours = int(match.group(3)[:-1]) * 60 if match.group(3) else 0
+        minutes = int(match.group(4)[:-1]) if match.group(4) else 0
+        duration = hours + minutes if hours or minutes else default_duration
         shifts.append({"day": day, "shift_type": shift_type, "duration": duration})
 
     return shifts
@@ -209,7 +212,7 @@ def main():
     shift_start = settings["shift_start"]
     hourly_rate = float(settings["hourly_rate"])
 
-    user_input = input("Podaj dni pracy (np. 12, 13 8h, 01N): ").strip()
+    user_input = input("Podaj dni pracy (np. 12, 13 8h, 1N, 4 6h30m): ").strip()
     shifts = parse_shift_input(user_input, default_duration, default_shift)
 
     if shifts:
