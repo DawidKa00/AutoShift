@@ -41,7 +41,10 @@ def authenticate_google_calendar():
 
     # Sprawdzenie, czy plik z tokenem istnieje
     if os.path.exists("token.json"):
-        creds = Credentials.from_authorized_user_file("token.json", SCOPES)
+        try:
+            creds = Credentials.from_authorized_user_file("token.json", SCOPES)
+        except Exception as e:
+            print(e)
 
     # Ponowne uwierzytelnienie w razie potrzeby
     if not creds or not creds.valid:
@@ -135,6 +138,7 @@ def create_summary(shifts, month, hourly_rate):
     print(f"Godziny weekendowe: {total_weekend_minutes // 60}h {total_weekend_minutes % 60}m")
     print(f"Łącznie godzin: {int(total_hours)}h {total_day_minutes % 60}m")
     print(f"Zarobki: {total_earnings:.2f} zł")
+    input("Naciśnij przycisk, aby zakończyć")
 
 
 def create_calendar_events(service, shifts: list[dict], calendar_id: str, month: int, day_start: dict[str, int],
@@ -188,8 +192,7 @@ def select_month():
     default_month = get_next_month()
 
     while True:
-        user_input = input(f"Wybierz miesiąc (domyślnie {datetime.date(2025, get_next_month(), 1)
-                           .strftime('%B')}): ").strip().lower()
+        user_input = input(f"Wybierz miesiąc (domyślnie {datetime.date(2025, get_next_month(), 1).strftime('%B')}): ").strip().lower()
         if not user_input:
             return default_month
         if user_input in MONTHS_MAP:
